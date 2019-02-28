@@ -1,9 +1,22 @@
+# No data!
+*.xls
+*.xlsx
+*.csv
+*.json
+*.gz
+*.txt
+*.log
+
+# and no output... well, we'll keep html files for now.
+*.pdf
+
+
 # History files
 .Rhistory
 .Rapp.history
 
 # Session Data files
-.RData
+*.RData
 
 # Example code in package build process
 *-Ex.R
