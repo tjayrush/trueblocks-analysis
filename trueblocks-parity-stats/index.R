@@ -1,24 +1,9 @@
-require(tidyverse)
-require(scales)
-require(magrittr)
-
-parity.archive.size <- read_tsv('data/directory-size.log', col_names = c("timestamp", "size", "dir")) %>%
-  filter(str_detect(dir, "/archive")) %>%
-  filter(timestamp != 1544481541)
+source('init.R')
 
 parity.archive.size %>%
   mutate(size = size / 1e+6) %>%
   ggplot(aes(x = timestamp, y = size)) +
   geom_line()
-
-parity.logs <- read_lines('data/archive-sync.log') %>%
-  str_subset(pattern = 'Syncing') %>%
-  substr(1, 37) %>%
-  str_split("  ", n = 2, simplify = TRUE) %>%
-  as_data_frame() %>%
-  rename("date" = V1, "block" = V2) %>%
-  mutate(block = str_split(block, "#", simplify=T)[,2] %>% as.integer()) %>%
-  mutate(date = as.POSIXct(date))
 
 parity.logs %>%
   ggplot(aes(x=date, y=block)) +
@@ -26,21 +11,8 @@ parity.logs %>%
   scale_y_continuous(labels = comma, breaks = function(lims) {return(seq(0, lims[2], by = 500000))}) +
   labs(title = "Parity Archive Node w/ Tracing sync progress")
 
-blockscrape.logs <- read_tsv('data/block-scrape-data-2.log', col_names = c(
-  "block-date",
-  "run-date",
-  "duration",
-  "blockNum",
-  "txs",
-  "trcs",
-  "depth",
-  "addrs",
-  "status",
-  "blooms"
-)) %>% bind_rows(read_tsv('data/block-scrape-data.log')) %>% arrange(`block-date`)
-# acctscrape <- read_tsv('data/acct-scrape-0.log') %>% bind_rows(read_tsv('data/acct-scrape.log'))
-# miniblock <- read_tsv('data/mini-block-data-0.log') %>% bind_rows(read_tsv('data/mini-block-data.log'))
 
+# blockscrape progress (blooms)
 blockscrape.logs %>%
   filter(status=="final-b") %>% 
   sample_n(100000) %>%
@@ -48,18 +20,17 @@ blockscrape.logs %>%
   geom_line() +
   scale_y_continuous(labels = comma, breaks = function(lims) {return(seq(0, lims[2], by = 500000))})
 
-blockscrape.logs.min.date <- min(blockscrape.logs$`run-date`)
-parity.logs.min.date <- min(parity.logs$date)
+# blockscrape progress (addr_index)
   
-blockscrape.logs %>%
-  filter(status=="final-b") %>%
+# blockscrape (blooms) vs parity sync
+blockscrape.logs.addr.index %>%
   sample_n(100000) %>%
-  mutate(time.since.start = `run-date` - blockscrape.min.date) %>%
+  mutate(time.since.start = `run-date` - blockscrape.logs.addr.index.min.date) %>%
   select(time.since.start, blockNum) %>%
   mutate(type = "blockscrape") %>%
   bind_rows(
     parity.logs %>%
-      mutate(time.since.start = date - parity.min.date) %>%
+      mutate(time.since.start = date - parity.logs.min.date) %>%
       rename(blockNum = block) %>%
       select(-date) %>%
       mutate(type = "parity")
