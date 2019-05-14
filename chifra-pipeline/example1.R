@@ -6,7 +6,7 @@ address <- "0xd10e6c4b44ee5557df0f11239ca4be5025791e8e"
 
 ## this is how we get json and turn it into a tibble.
 test.data <- paste0("http://localhost:8080/export?address=", address) %>%
-  fromJSON() %>%
+  fromJSON(simplifyVector = TRUE) %>%
   as_tibble()
 
 ## take a look at the data.
@@ -24,3 +24,8 @@ test.data %>%
   labs(caption = paste("This chart shows that address ", address, " was on the receiving end of a number of tx,",
     " but did not send any. You can also see the trace volume in blue, although it's not the most helpful ",
     " representation", sep = "\n"))
+
+test.data %>%
+  mutate(status = ifelse(from == address, "from", ifelse(to == address, "to", "other"))) %>%
+  ggplot(aes(x=blockNumber, y = value, color = status)) +
+  geom_point()
