@@ -14,6 +14,22 @@ data.dir <- "../../trueblocks-tokenomics/other_data/"
 
 For this R Notebook to work properly, you must define the proper data dir below. It expects the path of the "other_data" directory in the trueblocks-tokenomics repo. Please set your data.dir.
 
+## Transactions.xlsx / Traces.xlsx
+
+```{r trans.trace.data, message=FALSE}
+Transactions <- readxl::read_xlsx(paste0(data.dir, "Transactions.xlsx"), range = "A5:CW255") %>% 
+  rename(nTraces = `...1`) %>%
+  gather(block.bucket, occurrences, -nTraces) %>%
+  mutate(block.bucket = as.integer(block.bucket))
+
+Transactions %>%
+  #mutate(block.bucket = ntile(block.bucket, 25) * 2000000) %>%
+  ggplot(aes(x = block.bucket, y = nTraces, fill = occurrences)) +
+  geom_tile(color = "white", size=0) + 
+  viridis::scale_fill_viridis(name = "log(n occurrences)", trans="pseudo_log", option = "A") +
+  theme_minimal(base_size=8)
+```
+
 ```{r trace.data, message=FALSE}
 Traces <- readxl::read_xlsx(paste0(data.dir, "Traces.xlsx"), range = "A5:CW255") %>%
   rename(nTraces = `...1`) %>%
@@ -28,6 +44,9 @@ Traces %>%
   theme_minimal(base_size=8) +
   scale_x_continuous(labels = scales::comma)
 ```
+
+
+## tokensByWeek.txt
 
 ```{r}
 tokensByWeek <- read_delim(paste0(data.dir, "tokensByWeek.txt"), delim = "|") %>%
