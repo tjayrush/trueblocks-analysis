@@ -1,15 +1,19 @@
 ---
-title: "R Notebook"
+title: "trueblocks explorer"
+subtitle: "other_data exploration"
 output: html_notebook
 ---
 
-```{r setup, warning=FALSE}
+```{r setup, message=FALSE}
 require(tidyverse)
+require(viridis)
+require(readxl)
 data.dir <- "../../trueblocks-tokenomics/other_data/"
-countsByWeek <- read_tsv(paste0(data.dir, "countsByWeek.txt"))
 ```
 
-```{r}
+For this R Notebook to work properly, you must define the proper data dir below. It expects the path of the "other_data" directory in the trueblocks-tokenomics repo. Please set your data.dir.
+
+```{r trace.data, message=FALSE}
 Traces <- readxl::read_xlsx(paste0(data.dir, "Traces.xlsx"), range = "A5:CW255") %>%
   rename(nTraces = `...1`) %>%
   gather(block.bucket, occurrences, -nTraces) %>%
