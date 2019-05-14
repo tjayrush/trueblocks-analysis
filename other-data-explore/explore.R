@@ -17,3 +17,11 @@ Traces %>%
   viridis::scale_fill_viridis(name = "log(n occurrences)", trans="pseudo_log", option = "A") +
   theme_minimal(base_size=8)
 
+tokensByWeek <- read_delim(paste0(data.dir, "tokensByWeek.txt"), delim = "|") %>%
+  gather("type", "value", c(-blockNum, -date)) %>%
+  mutate(value = as.integer(value))
+
+tokensByWeek %>%
+  ggplot(aes(x = blockNum, y = value, color = type)) +
+  geom_line() +
+  theme_minimal(base_size=10)
