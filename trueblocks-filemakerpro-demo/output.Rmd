@@ -13,8 +13,24 @@ knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 ```
 
-```{r message=FALSE}
-read_csv(params$filepath) %>%
+```{r message=FALSE, fig.align='center'}
+params
+data.set <- read_csv(params$filepath) %>%
+  mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S"))
+
+data.set %>%
+  mutate(Type = ifelse(To == params$address, "In", ifelse(From == params$address, "From", "Other"))) %>%
+  filter(Type %in% c("In", "Out")) %>%
+  mutate(Date = as.Date(Date)) %>%
+  mutate(Amount = ifelse(Type == "Out", -Amount, Amount)) %>%
+  group_by(Type, Date) %>%
+  summarize(val = sum(Amount)) %>%
+  mutate(cumval = cumsum(val)) %>%
+  ggplot(aes(x=Date, y=cumval, color=Type)) +
+  geom_line() +
+  labs(title="Amount In/Out", y="Cumulative Ether In/Out")
+
+data.set %>%
   filter(To == params$address) %>%
   ggplot(aes(x=BlockNumber, fill=`Abis::Name`)) +
   geom_histogram() +

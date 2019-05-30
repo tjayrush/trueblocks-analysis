@@ -20,3 +20,9 @@ Rscript -e "rmarkdown::render('output.Rmd', params = list(\
   ))"
 open output.html
 ```
+
+
+
+Other ideas:
+
+- see WHERE on a contract your activity took place. E.g. line chart of activity on a contract, with red dots on your transactions. Would require a different script with "highlighted account" parameter.
