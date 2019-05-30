@@ -1,0 +1,27 @@
+---
+subtitle: "TrueBlocks Explorer output"
+date: "5/30/2019"
+output: html_document
+params:
+  filepath: "data/TheButton-0x2b0ec0993a00b2ea625e3b37fcc74742f43a72fe.csv"
+  address: "0x2b0ec0993a00b2ea625e3b37fcc74742f43a72fe"
+  name: "The Button"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(tidyverse)
+```
+
+```{r message=FALSE}
+read_csv(params$filepath) %>%
+  filter(To == params$address) %>%
+  ggplot(aes(x=BlockNumber, fill=`Abis::Name`)) +
+  geom_histogram() +
+  labs(title = paste0("Functions called on address ", params$address))
+```
+
+
+---
+title: `r params$name`
+---
