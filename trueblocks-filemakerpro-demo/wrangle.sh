@@ -12,7 +12,7 @@ echo "Processing: ----- $name --- $address -----------------"
 cd $path
 
 # put the header row into the file
-cat "data/header.csv" | tr '\r' '\n' >data/output.csv
+cat "header.line" | tr '\r' '\n' >data/output.csv
 
 # fix a few things (remove AM/PM and change 'invocation' to 'call'). Append results to end of file
 cat "data/$name-$address.csv" | tr '\r' '\n' | sed 's/ PM//g' | sed 's/ AM//' | sed 's/invocation/call/' >>data/output.csv
