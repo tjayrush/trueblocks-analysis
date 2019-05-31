@@ -7,8 +7,6 @@ params:
   name: "Aragon Dream DAO Party"
 always_allow_html: yes
 output:
-  pdf_document:
-    toc: yes
   html_document:
     df_print: paged
     includes:
@@ -48,7 +46,9 @@ data.set %>%
 
 data.set %>%
   filter(To == params$address) %>%
-  group_by(From) 
+  group_by(FromName) %>%
+  summarize(n = n(), sum.eth.value = sum(EtherValue)) %>%
+  arrange(desc(sum.eth.value))
 
 data.set %>%
   filter(To == params$address) %>%
