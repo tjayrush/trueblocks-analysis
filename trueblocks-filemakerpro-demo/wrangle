@@ -1,15 +1,13 @@
-cd /Users/jrush/src.GitHub/trueblocks-analysis/trueblocks-filemakerpro-demo/
 Name=$1
 Address=$2
+Path=/Users/jrush/src.GitHub/trueblocks-analysis/trueblocks-filemakerpro-demo/
+
+cd $Path
 
 echo "Processing: ----- $Name --- $Address -----------------"
 cat "data/Field List.csv"     | tr '\r' '\n' >data/output.csv
 cat "data/$Name-$Address.csv" | tr '\r' '\n' | sed 's/ PM//g' | sed 's/ AM//' | sed 's/invocation/call/' >>data/output.csv
-#awk 'BEGIN{FS=OFS="\t"} {gsub(/"/,"\"\"",$1); $1="\"" $1 "\""} 1' data/output.csv >tmp && mv -f tmp data/output.csv
-#awk 'BEGIN{FS=OFS="\t"} {gsub(/"/,"\"\"",$6); $6="\"" $6 "\""} 1' data/output.csv >tmp && mv -f tmp data/output.csv
-#awk 'BEGIN{FS=OFS="\t"} {gsub(/"/,"\"\"",$8); $8="\"" $8 "\""} 1' data/output.csv >tmp && mv -f tmp data/output.csv
-#awk 'BEGIN{FS=OFS="\t"} {gsub(/"/,"\"\"",$17); $17="\"" $17 "\""} 1' data/output.csv >tmp && mv -f tmp data/output.csv
-cat data/output.csv
 
+cat data/output.csv
 Rscript -e "rmarkdown::render('output.Rmd', params = list(filepath = 'data/output.csv', address = '$Address', name = '$Name' ))"
 open output.html
