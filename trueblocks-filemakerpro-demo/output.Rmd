@@ -19,7 +19,7 @@ require(tidyverse)
 require(scales)
 ```
 
-```{r}
+```{r message=FALSE, echo=FALSE}
 params
 data.set <- read_csv(params$filepath) %>%
   mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S")) %>%
@@ -29,9 +29,22 @@ data.set <- read_csv(params$filepath) %>%
 ```
 
 
-## ETH In/Out
+# ETH Amounts
 
-```{r message=FALSE, warning=FALSE, fig.align='center'}
+## Top value transferred in by account
+
+```{r message=FALSE}
+data.set %>%
+  filter(To == params$address) %>%
+  group_by(FromName) %>%
+  summarize(n = n(), sum.eth.value = sum(EtherValue)) %>%
+  arrange(desc(sum.eth.value)) %>%
+  mutate(sum.eth.value = round(sum.eth.value, 3))
+```
+
+## Chart of ETH in/out
+
+```{r message=FALSE, warning=FALSE, fig.align='center', fig.height=4, fig.width=4}
 data.set %>%
   mutate(Type = ifelse(To == params$address, "In", ifelse(From == params$address, "From", "Other"))) %>%
   filter(Type %in% c("In", "Out")) %>%
@@ -43,21 +56,26 @@ data.set %>%
   ggplot(aes(x=Date, y=cumval, color=Type)) +
   geom_line() +
   labs(title="Ether In/Out", y="Cumulative Ether In/Out")
+```
 
-data.set %>%
-  filter(To == params$address) %>%
-  group_by(FromName) %>%
-  summarize(n = n(), sum.eth.value = sum(EtherValue)) %>%
-  arrange(desc(sum.eth.value))
 
+# Function calls
+
+## 
+
+```{r message=FALSE}
 data.set %>%
   filter(To == params$address) %>%
   ggplot(aes(x=BlockNumber, fill=FunctionName)) +
   geom_histogram() +
   scale_x_continuous(labels = comma) +
   labs(title = paste0("Functions called on address ", params$address))
+```
 
 
+## Top 10 most active users, activity plot
+
+```{r message=FALSE, echo=FALSE}
 top10 <- data.set %>%
   filter(To == params$address) %>%
   group_by(FromName) %>%
