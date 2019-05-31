@@ -1,48 +1,66 @@
 require(tidyverse)
 
-eth.tweet.me <- read_csv("data/EthTweetMe-0x48d9eac690ba14e055af890cc33e17e2cbc0a37a.csv")
-giveth.vault <- read_csv("data/Giveth_Vault-0x5adf43dd006c6c36506e2b2dfa352e60002d22dc.csv") %>% 
-  mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S"))
-the.button   <- read_csv("data/TheButton-0x2b0ec0993a00b2ea625e3b37fcc74742f43a72fe.csv") %>%
-  mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S"))
+params <- list(
+  address = "0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359",
+  name = "EtherumTipJar"
+)
 
-eth.tweet.me %>% View()
+params$filepath <- "data/output.csv"
 
-eth.tweet.me %>% 
-  ggplot(aes(x=BlockNumber, fill=`Abis::Name`)) +
-  geom_histogram()
+data.set <- read_csv(params$filepath) %>%
+  mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S")) %>%
+  mutate(FunctionName = ifelse(is.na(FunctionName), "NA", FunctionName)) %>%
+  return()
 
-# eth.tweet.me %>%
-#   mutate(hundred.thousands = floor((BlockNumber %% 1e6) / 1e5)*1e5,
-#          millions = floor(BlockNumber / 1e6) * 1e6) %>%
-#   ggplot(aes(x=millions, y=hundred.thousands)) +
-#   geom_tile(color = "white", size=0) + 
-#   viridis::scale_fill_viridis(name = "count", option = "A", labels=scales::comma) +
-#   theme_minimal(base_size=8)
 
-giveth.vault %>% select(Date)
-
-giveth.vault %>%
-  mutate(Type = ifelse(To == "0x5adf43dd006c6c36506e2b2dfa352e60002d22dc", "In", ifelse(From == "0x5adf43dd006c6c36506e2b2dfa352e60002d22dc", "From", "Other"))) %>%
+data.set %>%
+  mutate(Type = ifelse(To == params$address, "In", ifelse(From == params$address, "From", "Other"))) %>%
   filter(Type %in% c("In", "Out")) %>%
   mutate(Date = as.Date(Date)) %>%
-  mutate(Amount = ifelse(Type == "Out", -Amount, Amount)) %>%
+  mutate(EtherValue = ifelse(Type == "Out", -EtherValue, EtherValue)) %>%
   group_by(Type, Date) %>%
-  summarize(val = sum(Amount)) %>%
+  summarize(val = sum(EtherValue)) %>%
   mutate(cumval = cumsum(val)) %>%
   ggplot(aes(x=Date, y=cumval, color=Type)) +
   geom_line() +
-  labs(title="Amount In/Out")
+  labs(title="Ether In/Out", y="Cumulative Ether In/Out")
 
-giveth.vault %>%
-  filter(From == "0x5adf43dd006c6c36506e2b2dfa352e60002d22dc") %>%
-  mutate(Date = as.Date(Date)) %>%
-  group_by(Date) %>%
-  summarize(val = sum(Amount)) %>%
-  mutate(cumval = cumsum(val)) %>%
-  ggplot(aes(x=Date, y=cumval)) +
-  geom_line() +
-  labs(title="Amount Out")
+data.set %>%
+  filter(To == params$address) %>%
+  ggplot(aes(x=BlockNumber, fill=FunctionName)) +
+  geom_histogram() +
+  labs(title = paste0("Functions called on address ", params$address))
 
-the.button
-the.button %>% View()
+
+top10 <- data.set %>%
+  filter(To == params$address) %>%
+  mutate(FromName = ifelse(is.na(FromName), From, FromName)) %>%
+  group_by(FromName) %>%
+  summarize(count = n()) %>%
+  top_n(10, count) %>%
+  select(FromName) %>%
+  unlist() %>%
+  unname()
+
+data.set %>%
+  filter(To == params$address) %>%
+  mutate(FromName = ifelse(is.na(FromName), From, FromName)) %>%
+  filter(FromName %in% top10) %>%
+  ggplot(aes(x=Date, y=FunctionName, color=FromName)) +
+  geom_point() +
+  facet_wrap(facets = 'FromName') +
+  # scale_y_discrete(limits=rev(c('startAuction', 'startAuctions', 'startAuctionsAndBid', 'newBid', 'unsealBid', 'finalizeAuction', 'transfer', 'invalidateName'))) +
+  theme(legend.position="none") +
+  labs(title = paste0("Top 10 users function timeline"))
+
+
+top10 <- data.set %>%
+  filter(To == "0xecbc1cf6e45aada03cf557cfd20f85be9b29327d") %>%
+  mutate(FromName = ifelse(is.na(FromName), From, FromName)) %>%
+  group_by(FromName) %>%
+  summarize(count = n()) %>%
+  top_n(10, count) %>%
+  select(FromName) %>%
+  unlist() %>%
+  unname()
+top10 %>% View()

@@ -25,6 +25,14 @@ open output.html
 The shell script `wrangle` is used to add a header row to the exported data. I can't figure out how to do this inside of FileMaker Pro.
 This script is called directly from FileMaker Pro. It uses the account name and address to build a file called `output.csv` in the `./data/` folder. The 'R' script always reads from `output.csv`.
 
+example wrangle use:
+
+```
+wrangle.sh AragonDreamDAOParty 0xecbc1cf6e45aada03cf557cfd20f85be9b29327d data/AragonDreamDAOParty-0xecbc1cf6e45aada03cf557cfd20f85be9b29327d.csv
+
+wrangle.sh EtherumTipJar 0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359 data/EtherumTipJar-0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359.csv
+```
+
 ```
 name=$1
 address=$2

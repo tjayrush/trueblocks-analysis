@@ -11,7 +11,7 @@
 *.pdf
 
 # and what the hell are DS_Store files good for anyway
-*.DS_Store
+.DS_Store
 
 # History files
 .Rhistory
