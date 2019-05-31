@@ -23,14 +23,26 @@ eth.tweet.me %>%
 giveth.vault %>% select(Date)
 
 giveth.vault %>%
-  filter(To == "0x5adf43dd006c6c36506e2b2dfa352e60002d22dc") %>%
-  group_by(as.Date(Date)) %>%
+  mutate(Type = ifelse(To == "0x5adf43dd006c6c36506e2b2dfa352e60002d22dc", "In", ifelse(From == "0x5adf43dd006c6c36506e2b2dfa352e60002d22dc", "From", "Other"))) %>%
+  filter(Type %in% c("In", "Out")) %>%
+  mutate(Date = as.Date(Date)) %>%
+  mutate(Amount = ifelse(Type == "Out", -Amount, Amount)) %>%
+  group_by(Type, Date) %>%
+  summarize(val = sum(Amount)) %>%
+  mutate(cumval = cumsum(val)) %>%
+  ggplot(aes(x=Date, y=cumval, color=Type)) +
+  geom_line() +
+  labs(title="Amount In/Out")
+
+giveth.vault %>%
+  filter(From == "0x5adf43dd006c6c36506e2b2dfa352e60002d22dc") %>%
+  mutate(Date = as.Date(Date)) %>%
+  group_by(Date) %>%
   summarize(val = sum(Amount)) %>%
   mutate(cumval = cumsum(val)) %>%
   ggplot(aes(x=Date, y=cumval)) +
   geom_line() +
-  labs(title="Amount In")
+  labs(title="Amount Out")
 
-
-  ggplot(aes(x=BlockNumber, y=Amount)) +
-  geom_bar(stat="identity")
+the.button
+the.button %>% View()
