@@ -28,9 +28,9 @@ This script is called directly from FileMaker Pro. It uses the account name and 
 example wrangle use:
 
 ```
-wrangle.sh AragonDreamDAOParty 0xecbc1cf6e45aada03cf557cfd20f85be9b29327d data/AragonDreamDAOParty-0xecbc1cf6e45aada03cf557cfd20f85be9b29327d.csv
+bash wrangle.sh AragonDreamDAOParty 0xecbc1cf6e45aada03cf557cfd20f85be9b29327d data/AragonDreamDAOParty-0xecbc1cf6e45aada03cf557cfd20f85be9b29327d.csv
 
-wrangle.sh EtherumTipJar 0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359 data/EtherumTipJar-0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359.csv
+bash wrangle.sh EtherumTipJar 0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359 data/EtherumTipJar-0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359.csv
 ```
 
 ```
