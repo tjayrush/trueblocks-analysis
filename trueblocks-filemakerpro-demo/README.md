@@ -22,21 +22,21 @@ Rscript -e "rmarkdown::render('output.Rmd', params = list(\
 open output.html
 ```
 
-I wrotr a shell script called `wrangle` because it was easier to build the more simply command in FileMaker pro. I also had to add a header row to the file because I couldn't figure out how to do it in FileMaker. Here's the code for `wrangle`. This is called directly from FileMaker.
+The shell script `wrangle` is used to add a header row to the exported data. I can't figure out how to do this inside of FileMaker Pro.
+This script is called directly from FileMaker Pro. It uses the account name and address to build a file called `output.csv` in the `./data/` folder. The 'R' script always reads from `output.csv`.
 
 ```
-Name=$1
-Address=$2
-Path=$3
+name=$1
+address=$2
+path=$3
 
-cd $Path
+cd $path
 
-echo "Processing: ----- $Name --- $Address -----------------"
-cat "data/Field List.csv"     | tr '\r' '\n' >data/output.csv
-cat "data/$Name-$Address.csv" | tr '\r' '\n' | sed 's/ PM//g' | sed 's/ AM//' | sed 's/invocation/call/' >>data/output.csv
+echo "Processing: ----- $name --- $address -----------------"
+cat "data/header.csv"     | tr '\r' '\n' >data/output.csv
+cat "data/$name-$address.csv" | tr '\r' '\n' | sed 's/ PM//g' | sed 's/ AM//' | sed 's/invocation/call/' >>data/output.csv
 
-#cat data/output.csv
-Rscript -e "rmarkdown::render('output.Rmd', params = list(filepath = 'data/output.csv', address = '$Address', name = '$Name' ))"
+Rscript -e "rmarkdown::render('output.Rmd', params = list(filepath = 'data/output.csv', address = '$address', name = '$name' ))"
 open output.html
 
 ```

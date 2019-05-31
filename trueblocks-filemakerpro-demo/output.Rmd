@@ -31,16 +31,12 @@ data.set %>%
   geom_line() +
   labs(title="Ether In/Out", y="Cumulative Ether In/Out")
 
-data.set$FunctionName %>% print()
-
 data.set %>%
   filter(To == params$address) %>%
   ggplot(aes(x=BlockNumber, fill=`FunctionName`)) +
   geom_histogram() +
   labs(title = paste0("Functions called on address ", params$address))
 ```
-
-
 ---
 title: `r params$name`
 ---
