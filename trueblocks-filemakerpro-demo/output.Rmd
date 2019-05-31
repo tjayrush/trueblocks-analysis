@@ -16,28 +16,27 @@ require(tidyverse)
 ```{r message=FALSE, fig.align='center'}
 params
 data.set <- read_csv(params$filepath) %>%
-  mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S"))
+  mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S")) %>%
+  mutate(FunctionName = paste(FunctionName, "a")) # If I don't do this, some addresses with no named functions fail on the 'fill' below
 
 data.set %>%
   mutate(Type = ifelse(To == params$address, "In", ifelse(From == params$address, "From", "Other"))) %>%
   filter(Type %in% c("In", "Out")) %>%
   mutate(Date = as.Date(Date)) %>%
-  mutate(Amount = ifelse(Type == "Out", -Amount, Amount)) %>%
+  mutate(EtherValue = ifelse(Type == "Out", -EtherValue, EtherValue)) %>%
   group_by(Type, Date) %>%
-  summarize(val = sum(Amount)) %>%
+  summarize(val = sum(EtherValue)) %>%
   mutate(cumval = cumsum(val)) %>%
   ggplot(aes(x=Date, y=cumval, color=Type)) +
   geom_line() +
-  labs(title="Amount In/Out", y="Cumulative Ether In/Out")
+  labs(title="Ether In/Out", y="Cumulative Ether In/Out")
 
 data.set %>%
   filter(To == params$address) %>%
-  ggplot(aes(x=BlockNumber, fill=`Abis::Name`)) +
+  ggplot(aes(x=BlockNumber, fill=`FunctionName`)) +
   geom_histogram() +
   labs(title = paste0("Functions called on address ", params$address))
 ```
-
-
 ---
 title: `r params$name`
 ---
