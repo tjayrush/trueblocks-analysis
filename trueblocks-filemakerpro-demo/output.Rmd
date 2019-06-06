@@ -144,6 +144,23 @@ data.set %>%
   theme(panel.spacing = unit(2, "lines"))
 ```
 
+
+# Categories
+
+<div class="blue">
+This section displays data according to the categorization done by the TrueBlocks explorer application.
+</div>
+
+## Appearances by category
+
+```{r message=FALSE, fig.align='center', warning=FALSE}
+data.set %>%
+  filter(To == p.address) %>%
+  ggplot(aes(x=Date, y=Category, color=isError)) +
+  geom_jitter(width=0, height=.2) +
+  scale_color_manual(values = tf.scale)
+```
+
 ```{r}
 params
 ```
