@@ -53,7 +53,7 @@ This section deals with the ether coming in and out of the account, as well as a
 ```{r message=FALSE, fig.height=4}
 data.set %>%
   filter(To == p.address) %>%
-  ggplot(aes(x=BlockNumber, y=NA, size=EtherValue, color=isError)) +
+  ggplot(aes(x=BlockNumber, y=DollarsThen, size=EtherValue, color=isError)) +
   scale_color_manual(values = c("#000000","#CC0000")) +
   geom_jitter()
 ```
@@ -98,10 +98,23 @@ data.set %>%
   ggplot(aes(x=BlockNumber, fill=isError)) +
   geom_histogram() +
   scale_x_continuous(labels = comma) + 
-  facet_wrap(facets = "FunctionName", ncol = 1) +
+  facet_wrap(facets = "FunctionName", ncol = 1, scales = "free_y", strip.position = "left") +
   scale_fill_manual(values = c("#000000","#CC0000"))
 ```
 
+## Users in order of appearance count
+
+```{r}
+data.set %>%
+  filter(To == p.address) %>%
+  group_by(FromName, isError) %>%
+  summarize(count = n()) %>%
+  spread(isError, count) %>%
+  rename(error = `TRUE`, success = `FALSE`) %>%
+  mutate_at(c("error", "success"), function(x) {return(ifelse(is.na(x), 0, x))}) %>%
+  mutate(total = error + success) %>%
+  arrange(desc(total))
+```
 
 ##  Activity plot for top 10 most active users (users ranked by appearance count)
 
@@ -117,14 +130,15 @@ top10 <- data.set %>%
   unname()
 ```
 
-```{r message=FALSE, fig.align='center', fig.width=10, fig.height=12}
+```{r message=FALSE, fig.align='center', fig.width=10, fig.height=14}
 data.set %>%
   filter(To == p.address) %>%
   filter(FromName %in% top10) %>%
   ggplot(aes(x=Date, y=FunctionName, color=isError)) +
   scale_color_manual(values = c("#000000","#CC0000")) +
   geom_jitter(width=.2, height=.2) +
-  facet_wrap(facets = 'FromName', ncol=1)
+  facet_wrap(facets = 'FromName', ncol=1) +
+  theme(panel.spacing = unit(2, "lines"))
 ```
 
 ```{r}
