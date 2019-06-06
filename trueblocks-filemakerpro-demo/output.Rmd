@@ -28,6 +28,7 @@ knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 require(scales)
 p.address <- tolower(params$address)
+tf.scale <- c(`FALSE` = "#000000", `TRUE` = "#CC0000")
 ```
 
 ```{r message=FALSE, echo=FALSE, warning=FALSE}
@@ -54,7 +55,7 @@ This section deals with the ether coming in and out of the account, as well as a
 data.set %>%
   filter(To == p.address) %>%
   ggplot(aes(x=BlockNumber, y=DollarsThen, size=EtherValue, color=isError)) +
-  scale_color_manual(values = c("#000000","#CC0000")) +
+  scale_color_manual(values = tf.scale) +
   geom_jitter()
 ```
 
@@ -92,14 +93,15 @@ This section provides insight into what functions were called when and by whom.
 
 ## Function calls on address `r p.address`
 
-```{r message=FALSE, fig.align='center', fig.height=8}
+```{r message=FALSE, fig.align='center', fig.height=12}
 data.set %>%
   filter(To == p.address) %>%
   ggplot(aes(x=BlockNumber, fill=isError)) +
   geom_histogram() +
   scale_x_continuous(labels = comma) + 
-  facet_wrap(facets = "FunctionName", ncol = 1, scales = "free_y", strip.position = "left") +
-  scale_fill_manual(values = c("#000000","#CC0000"))
+  facet_wrap(facets = "FunctionName", ncol = 1, scales = "free_y") +
+  scale_fill_manual(values = tf.scale) +
+  theme(panel.spacing = unit(2, "lines"))
 ```
 
 ## Users in order of appearance count
@@ -107,9 +109,10 @@ data.set %>%
 ```{r}
 data.set %>%
   filter(To == p.address) %>%
+  mutate(isError = factor(isError, levels = c(FALSE, TRUE))) %>%
   group_by(FromName, isError) %>%
   summarize(count = n()) %>%
-  spread(isError, count) %>%
+  spread(isError, count, drop = FALSE) %>%
   rename(error = `TRUE`, success = `FALSE`) %>%
   mutate_at(c("error", "success"), function(x) {return(ifelse(is.na(x), 0, x))}) %>%
   mutate(total = error + success) %>%
@@ -130,12 +133,12 @@ top10 <- data.set %>%
   unname()
 ```
 
-```{r message=FALSE, fig.align='center', fig.width=10, fig.height=14}
+```{r message=FALSE, fig.align='center', fig.width=10, fig.height=18}
 data.set %>%
   filter(To == p.address) %>%
   filter(FromName %in% top10) %>%
   ggplot(aes(x=Date, y=FunctionName, color=isError)) +
-  scale_color_manual(values = c("#000000","#CC0000")) +
+  scale_color_manual(values = tf.scale) +
   geom_jitter(width=.2, height=.2) +
   facet_wrap(facets = 'FromName', ncol=1) +
   theme(panel.spacing = unit(2, "lines"))
