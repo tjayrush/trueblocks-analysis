@@ -1,8 +1,8 @@
 ---
 params:
-  filepath: "."
-  address: "0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359"
-  name: "Aragon Dream DAO Party"
+  filepath: "./data/output.csv"
+  address: "0x1fd169A4f5c59ACf79d0Fd5d91D1201EF1Bce9f1"
+  name: "MolochDAO"
 always_allow_html: yes
 output:
   html_document:
@@ -27,6 +27,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 require(scales)
+p.address <- tolower(params$address)
 ```
 
 ```{r message=FALSE, echo=FALSE, warning=FALSE}
@@ -51,7 +52,7 @@ This section deals with the ether coming in and out of the account, as well as a
 
 ```{r message=FALSE, fig.height=4}
 data.set %>%
-  filter(To == params$address) %>%
+  filter(To == p.address) %>%
   ggplot(aes(x=BlockNumber, y=NA, size=EtherValue, color=isError)) +
   scale_color_manual(values = c("#000000","#CC0000")) +
   geom_jitter()
@@ -61,7 +62,7 @@ data.set %>%
 
 ```{r message=FALSE}
 data.set %>%
-  filter(To == params$address & !isError) %>%
+  filter(To == p.address & !isError) %>%
   group_by(FromName) %>%
   summarize(n = n(), sum.eth.value = sum(EtherValue), sum.dollars.then = sum(DollarsThen)) %>%
   arrange(desc(sum.eth.value)) %>%
@@ -71,7 +72,7 @@ data.set %>%
 ## Chart of ETH in/out
 ```{r message=FALSE, warning=FALSE, fig.align='center', fig.height=4, fig.width=4, fig.cap="This chart is a work in progress. In the case of smart contracts, it is common for 'ETH out' values to be contained in traces. We still have to parse these traces to include them in this chart."}
 data.set %>%
-  mutate(Type = ifelse(To == params$address, "In", ifelse(From == params$address, "From", "Other"))) %>%
+  mutate(Type = ifelse(To == p.address, "In", ifelse(From == p.address, "From", "Other"))) %>%
   filter(Type %in% c("In", "Out") & !isError) %>%
   mutate(Date = as.Date(Date)) %>%
   mutate(EtherValue = ifelse(Type == "Out", -EtherValue, EtherValue)) %>%
@@ -89,11 +90,11 @@ data.set %>%
 This section provides insight into what functions were called when and by whom.
 </div>
 
-## Function calls on address `r params$address`
+## Function calls on address `r p.address`
 
 ```{r message=FALSE, fig.align='center', fig.height=8}
 data.set %>%
-  filter(To == params$address) %>%
+  filter(To == p.address) %>%
   ggplot(aes(x=BlockNumber, fill=isError)) +
   geom_histogram() +
   scale_x_continuous(labels = comma) + 
@@ -104,9 +105,9 @@ data.set %>%
 
 ##  Activity plot for top 10 most active users (users ranked by appearance count)
 
-```{r message=FALSE, echo=FALSE}
+```{r message=FALSE, echo=FALSE, warning=FALSE}
 top10 <- data.set %>%
-  filter(To == params$address) %>%
+  filter(To == p.address) %>%
   group_by(FromName) %>%
   summarize(count = n()) %>%
   top_n(10, count) %>%
@@ -118,13 +119,12 @@ top10 <- data.set %>%
 
 ```{r message=FALSE, fig.align='center', fig.width=10, fig.height=12}
 data.set %>%
-  filter(To == params$address) %>%
+  filter(To == p.address) %>%
   filter(FromName %in% top10) %>%
   ggplot(aes(x=Date, y=FunctionName, color=isError)) +
-  scale_fill_manual(values = c("#000000","#CC0000")) +
+  scale_color_manual(values = c("#000000","#CC0000")) +
   geom_jitter(width=.2, height=.2) +
-  facet_wrap(facets = 'FromName', ncol=1) +
-  theme(legend.position="none")
+  facet_wrap(facets = 'FromName', ncol=1)
 ```
 
 ```{r}
