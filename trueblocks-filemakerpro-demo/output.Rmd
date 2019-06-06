@@ -41,13 +41,13 @@ theme_set(theme_minimal(base_size=12))
 ```
 
 
-# ETH Amounts
+# Money in/out
 
 <div class="blue">
-This section deals with the ether coming in and out of the account.
+This section deals with the ether coming in and out of the account, as well as a bit about dollars.
 </div>
 
-## ETH deposit timeline
+## ETH deposit (ETH in) timeline
 
 ```{r message=FALSE, fig.height=4}
 data.set %>%
@@ -57,22 +57,22 @@ data.set %>%
   geom_jitter()
 ```
 
-## Top value transferred in by account
+## Value transferred in by account
 
 ```{r message=FALSE}
 data.set %>%
-  filter(To == params$address) %>%
+  filter(To == params$address & !isError) %>%
   group_by(FromName) %>%
-  summarize(n = n(), sum.eth.value = sum(EtherValue)) %>%
+  summarize(n = n(), sum.eth.value = sum(EtherValue), sum.dollars.then = sum(DollarsThen)) %>%
   arrange(desc(sum.eth.value)) %>%
-  mutate(sum.eth.value = round(sum.eth.value, 3))
+  mutate(sum.eth.value = round(sum.eth.value, 3), sum.dollars.then = round(sum.dollars.then, 3))
 ```
 
 ## Chart of ETH in/out
 ```{r message=FALSE, warning=FALSE, fig.align='center', fig.height=4, fig.width=4, fig.cap="This chart is a work in progress. In the case of smart contracts, it is common for 'ETH out' values to be contained in traces. We still have to parse these traces to include them in this chart."}
 data.set %>%
   mutate(Type = ifelse(To == params$address, "In", ifelse(From == params$address, "From", "Other"))) %>%
-  filter(Type %in% c("In", "Out")) %>%
+  filter(Type %in% c("In", "Out") & !isError) %>%
   mutate(Date = as.Date(Date)) %>%
   mutate(EtherValue = ifelse(Type == "Out", -EtherValue, EtherValue)) %>%
   group_by(Type, Date) %>%
@@ -85,15 +85,18 @@ data.set %>%
 
 # Function calls
 
-## 
+<div class="blue">
+This section provides insight into what functions were called when and by whom.
+</div>
+
+## Function calls on address `r params$address`
 
 ```{r message=FALSE, fig.align='center', fig.height=8}
 data.set %>%
   filter(To == params$address) %>%
   ggplot(aes(x=BlockNumber, fill=isError)) +
   geom_histogram() +
-  scale_x_continuous(labels = comma) +
-  labs(title = paste0("Functions called on address ", params$address)) + 
+  scale_x_continuous(labels = comma) + 
   facet_wrap(facets = "FunctionName", ncol = 1) +
   scale_fill_manual(values = c("#000000","#CC0000"))
 ```
@@ -121,8 +124,7 @@ data.set %>%
   scale_fill_manual(values = c("#000000","#CC0000")) +
   geom_jitter(width=.2, height=.2) +
   facet_wrap(facets = 'FromName', ncol=1) +
-  theme(legend.position="none") +
-  labs(title = paste0("Function timeline for top 10 users"))
+  theme(legend.position="none")
 ```
 
 ```{r}
