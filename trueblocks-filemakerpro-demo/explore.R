@@ -10,6 +10,7 @@ params$filepath <- "data/output.csv"
 data.set <- read_csv(params$filepath) %>%
   mutate(Date = as.POSIXct(Date, format="%m/%d/%Y %H:%M:%S")) %>%
   mutate(FunctionName = ifelse(is.na(FunctionName), "NA", FunctionName)) %>%
+  mutate(isError = isError == 1) %>%
   return()
 
 
