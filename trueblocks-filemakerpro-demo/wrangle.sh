@@ -2,6 +2,8 @@
 #
 # Wrangles data exported by the FileMaker Pro demo
 
+export PATH=$PATH:/usr/local/bin
+
 name=$1
 address=$2
 path=$3
